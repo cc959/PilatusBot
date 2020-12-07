@@ -1,6 +1,5 @@
 var icy = require('icy');
 var Discord = require('discord.js');
-var fs = require('fs');
 var admin = require('firebase-admin');
 var https = require("https");
 var btoa = require("btoa");
@@ -55,15 +54,15 @@ function getTitle() {
 
             console.log(withinTime + " " + parsed.StreamTitle);
 
-
-
             if (parsed.StreamTitle !== title && !containsPilatus && parsed.StreamTitle.length > 5) {
 
                 console.log(parsed.StreamTitle + " " + title);
 
+                title = parsed.StreamTitle;
+
+
                 if (withinTime) {
                     //github sux
-                    title = parsed.StreamTitle;
                     console.log(title);
                     channel.send(title);
 
