@@ -59,6 +59,8 @@ function getTitle() {
 
             if (parsed.StreamTitle !== title && !containsPilatus && parsed.StreamTitle.length > 5) {
 
+                console.log(parsed.StreamTitle + " " + title);
+
                 if (withinTime) {
                     //github sux
                     title = parsed.StreamTitle;
