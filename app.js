@@ -33,7 +33,7 @@ var title;
 var url = 'https://radiopilatus.ice.infomaniak.ch/pilatus192.mp3';
 
 
-getGithubFileInfo("cc959/PilatusBot", "Songs.txt").then(e => getGithubFile(e.download_url)).then(e => { songs = e; title = songs.split("\n").pop(); getTitle(); }).catch(e => console.error(e));
+getGithubFileInfo("cc959/PilatusBot", "Songs.txt").then(e => getGithubFile(e.download_url)).then(e => { songs = e; title = songs.split("\n").pop(); setInterval(() => { getTitle(); }, 3000); getTitle(); }).catch(e => console.error(e));
 
 
 
@@ -61,51 +61,47 @@ function getTitle() {
                 title = parsed.StreamTitle;
 
 
-                if (withinTime) {
-                    //github sux
-                    console.log(title);
-                    channel.send(title);
-
-                    getGithubFileInfo("cc959/PilatusBot", "Songs.txt").then(e => getGithubFile(e.download_url)).then(e => songs = e).catch(e => console.error(e));
-
-                    if (songs.includes(title)) {
-
-                        var message = {
-                            notification: {
-                                title: 'Duplicate Song',
-                                body: title
-                            },
-                            topic: "general"
-                        };
-
-                        admin.messaging().send(message);
-
-                    } else {
-                        songs += "\n" + title;
-
-                        var message = {
-                            notification: {
-                                title: 'New Song',
-                                body: title
-                            },
-                            topic: "general"
-                        };
-
-                        editGithubFile("cc959/PilatusBot", "Songs.txt", "Song updated by web app", songs).catch(e => console.error(e));
-
-                        admin.messaging().send(message);
-
-                    }
-                } else {
-
+                if (!withinTime) {
                     songs = "\n";
                     editGithubFile("cc959/PilatusBot", "Songs.txt", "Song updated by web app", songs).catch(e => console.error(e));
+                    return;
+                }
+
+                console.log(title);
+                channel.send(title);
+
+                getGithubFileInfo("cc959/PilatusBot", "Songs.txt").then(e => getGithubFile(e.download_url)).then(e => songs = e).catch(e => console.error(e));
+
+                if (songs.includes(title)) {
+
+                    var message = {
+                        notification: {
+                            title: 'Duplicate Song',
+                            body: title
+                        },
+                        topic: "general"
+                    };
+
+                    admin.messaging().send(message);
+
+                } else {
+                    songs += "\n" + title;
+
+                    var message = {
+                        notification: {
+                            title: 'New Song',
+                            body: title
+                        },
+                        topic: "general"
+                    };
+
+                    editGithubFile("cc959/PilatusBot", "Songs.txt", "Song updated by web app", songs).catch(e => console.error(e));
+
+                    admin.messaging().send(message);
 
                 }
+
             }
-
-            getTitle();
-
         });
     });
 }
