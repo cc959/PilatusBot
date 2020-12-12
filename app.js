@@ -1,8 +1,8 @@
-var icy = require('icy');
 var Discord = require('discord.js');
 var admin = require('firebase-admin');
 var https = require("https");
 var btoa = require("btoa");
+var atob = require("atob")
 
 var serviceAccount = require('./Firebase.json');
 const { resolve } = require('path');
@@ -15,6 +15,7 @@ admin.initializeApp({
     databaseURL: "https://pilatusbot-e5644-default-rtdb.firebaseio.com/"
 })
 
+var count = 0;
 
 var songs;
 
@@ -27,84 +28,124 @@ client.on("ready", () => {
     client.guilds.fetch("784113118543347733").then(guild => channel = guild.channels.cache.get("784113119571607584"));
 });
 
+
 var title;
 
 // URL to ICY stream
-var url = 'https://radiopilatus.ice.infomaniak.ch/pilatus192.mp3';
-
-
-getGithubFileInfo("cc959/PilatusBot", "Songs.txt").then(e => getGithubFile(e.download_url)).then(e => { songs = e; title = songs.split("\n").pop(); setInterval(() => { getTitle(); }, 3000); getTitle(); }).catch(e => console.error(e));
+var url = new URL('https://radiopilatus.ice.infomaniak.ch/pilatus192.mp3');
 
 
 
-// connect to the remote stream
-function getTitle() {
+getGithubFile("cc959/PilatusBot", "Songs.txt")
+    .then(e => {
+        songs = e;
+        title = songs.split("\n").pop();
+        setInterval(() => getStreamTitle().then(e => doShitWithTitle(e)).catch(e => console.error(e)), 4000);
+    })
+    .catch(e => console.error(e));
 
-    icy.get(url, function (res) {
+function getStreamTitle() {
 
-        // any "metadata" events that happen
-        res.on("metadata", function (metadata) {
-            var parsed = icy.parse(metadata);
+    return new Promise((resolve, rejects) => {
 
-            var containsPilatus = parsed.StreamTitle.indexOf("Radio Pilatus") !== -1;
+        var options = {
+            hostname: url.hostname,
+            path: url.pathname,
+            method: "GET",
+            headers: { "Icy-MetaData": 1 }
+        }
 
-            var timeNow = new Date().getUTCHours();
+        var req = https.get(options, res => {
 
-            var withinTime = timeNow > 4 && timeNow < 16;
+            res.setEncoding("utf-8");
 
-            console.log(withinTime + " " + parsed.StreamTitle);
+            res.on('data', (chunk) => {
 
-            if (parsed.StreamTitle !== title && !containsPilatus && parsed.StreamTitle.length > 5) {
+                if (chunk.includes("StreamTitle='")) {
 
-                console.log(parsed.StreamTitle + " " + title);
+                    var title = chunk.split("StreamTitle='")[1].split("';StreamUrl")[0];
 
-                title = parsed.StreamTitle;
+                    res.destroy();
 
-
-                if (!withinTime) {
-                    songs = "\n";
-                    editGithubFile("cc959/PilatusBot", "Songs.txt", "Song updated by web app", songs).catch(e => console.error(e));
-                    return;
+                    if (title.length < 5)
+                        getStreamTitle().then(e => resolve(e)).catch(e => console.error(e));
+                    else
+                        resolve(title);
                 }
 
-                console.log(title);
-                channel.send(title);
+            });
 
-                getGithubFileInfo("cc959/PilatusBot", "Songs.txt").then(e => getGithubFile(e.download_url)).then(e => songs = e).catch(e => console.error(e));
-
-                if (songs.includes(title)) {
-
-                    var message = {
-                        notification: {
-                            title: 'Duplicate Song',
-                            body: title
-                        },
-                        topic: "general"
-                    };
-
-                    admin.messaging().send(message);
-
-                } else {
-                    songs += "\n" + title;
-
-                    var message = {
-                        notification: {
-                            title: 'New Song',
-                            body: title
-                        },
-                        topic: "general"
-                    };
-
-                    editGithubFile("cc959/PilatusBot", "Songs.txt", "Song updated by web app", songs).catch(e => console.error(e));
-
-                    admin.messaging().send(message);
-
-                }
-
-            }
         });
+
+        req.on("error", err => {
+            rejects(err);
+        });
+
+        req.end();
     });
+
 }
+
+function doShitWithTitle(songTitle) {
+
+    var containsPilatus = songTitle.includes("Radio Pilatus");
+
+    var timeNow = new Date().getUTCHours();
+
+    var withinTime = true;//timeNow > 4 && timeNow < 16;
+
+    console.log("songtitle: '" + songTitle + "'");
+
+    if (songTitle !== title && !containsPilatus && songTitle.length > 5) {
+
+        title = songTitle;
+
+        if (!withinTime) {
+            songs = "\n";
+            editGithubFile("cc959/PilatusBot", "Songs.txt", "Song updated by web app", songs).catch(e => console.error(e));
+            return;
+        }
+
+        console.log(title);
+        channel.send(title);
+
+        getGithubFile("cc959/PilatusBot", "Songs.txt").then(e => songs = e).catch(e => console.error(e));
+
+        if (songs.includes(title)) {
+
+            var message = {
+                data: {
+                    title: 'Duplicate Song',
+                    body: title
+                },
+                priority: "high",
+                topic: "general"
+            };
+
+            admin.messaging().send(message);
+
+        } else {
+            songs += "\n" + title;
+
+            var message = {
+                data: {
+                    title: 'New Song',
+                    body: title
+                },
+                topic: "general"
+            };
+
+            editGithubFile("cc959/PilatusBot", "Songs.txt", "Song updated by web app", songs).catch(e => console.error(e));
+
+            admin.messaging().send(message);
+
+        }
+
+    }
+
+}
+
+
 
 function getGithubFileInfo(repos, filePath) {
 
@@ -120,8 +161,6 @@ function getGithubFileInfo(repos, filePath) {
 
         var req = https.get(options, res => {
 
-            console.log(res.statusCode);
-
             let rawData = '';
 
             res.setEncoding("utf-8");
@@ -130,7 +169,6 @@ function getGithubFileInfo(repos, filePath) {
             res.on('end', () => {
                 try {
                     const parsedData = JSON.parse(rawData);
-                    console.log(parsedData);
 
                     resolve(parsedData);
                 } catch (e) {
@@ -150,33 +188,10 @@ function getGithubFileInfo(repos, filePath) {
     })
 
 }
-function getGithubFile(filePath) {
+function getGithubFile(repos, filePath) {
 
     return new Promise((resolve, rejects) => {
-
-        var req = https.get(filePath, res => {
-
-            //console.log(res.statusCode);
-
-            let rawData = '';
-
-            res.setEncoding("utf-8");
-
-            res.on('data', (chunk) => { rawData += chunk; });
-            res.on('end', () => {
-                try {
-                    resolve(rawData.toString());
-                } catch (e) {
-                    console.error(e.message);
-                }
-            });
-
-            req.on("error", err => {
-                rejects(err);
-            });
-
-        });
-
+        getGithubFileInfo(repos, filePath).then(e => resolve(atob(e.content))).catch(e => rejects(e));
     });
 }
 function editGithubFile(repos, filePath, message, content) {

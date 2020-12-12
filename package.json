@@ -7,9 +7,10 @@
         "start": "node app.js"
     },
     "dependencies": {
+        "atob": "^2.1.2",
         "btoa": "^1.2.1",
         "discord.js": "^12.5.1",
-        "firebase-admin": "^9.4.1",
-        "icy": "^2.1.0"
+        "firebase-admin": "^9.4.2",
+        "https": "^1.0.0"
     }
 }
