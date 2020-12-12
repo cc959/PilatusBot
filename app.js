@@ -121,7 +121,7 @@ function doShitWithTitle(songTitle) {
                 data: {
                     title: 'Duplicate Song',
                     body: title,
-                    dupe: 1
+                    dupe: '1'
                 },
                 topic: "general"
             };
@@ -136,7 +136,7 @@ function doShitWithTitle(songTitle) {
                 data: {
                     title: 'New Song',
                     body: title,
-                    dupe: 0
+                    dupe: '0'
                 },
                 topic: "general"
             };
