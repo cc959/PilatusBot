@@ -122,7 +122,8 @@ function doShitWithTitle(songTitle) {
                 topic: "general"
             };
 
-            admin.messaging().send(message);
+            setTimeout(() => admin.messaging().send(message), 100);
+            console.log("sent firebase message");
 
         } else {
             songs += "\n" + title;
@@ -137,8 +138,8 @@ function doShitWithTitle(songTitle) {
 
             editGithubFile("cc959/PilatusBot", "Songs.txt", "Song updated by web app", songs).catch(e => console.error(e));
 
-            admin.messaging().send(message);
-
+            setTimeout(() => admin.messaging().send(message), 100);
+            console.log("sent firebase message");
         }
 
     }
