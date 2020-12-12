@@ -98,6 +98,7 @@ function doShitWithTitle(songTitle) {
 
     if (songTitle !== title && !containsPilatus && songTitle.length > 5) {
 
+
         title = songTitle;
 
         if (!withinTime) {
@@ -113,16 +114,19 @@ function doShitWithTitle(songTitle) {
 
         if (songs.includes(title)) {
 
+            if (songs.length - songs.indexOf(title) < 100)
+                return;
+
             var message = {
                 data: {
                     title: 'Duplicate Song',
-                    body: title
+                    body: title,
+                    dupe: 1
                 },
-                priority: "high",
                 topic: "general"
             };
 
-            setTimeout(() => admin.messaging().send(message), 100);
+            setTimeout(() => admin.messaging().send(message), 10);
             console.log("sent firebase message");
 
         } else {
@@ -131,14 +135,15 @@ function doShitWithTitle(songTitle) {
             var message = {
                 data: {
                     title: 'New Song',
-                    body: title
+                    body: title,
+                    dupe: 0
                 },
                 topic: "general"
             };
 
             editGithubFile("cc959/PilatusBot", "Songs.txt", "Song updated by web app", songs).catch(e => console.error(e));
 
-            setTimeout(() => admin.messaging().send(message), 100);
+            setTimeout(() => admin.messaging().send(message), 10);
             console.log("sent firebase message");
         }
 
