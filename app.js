@@ -34,24 +34,14 @@ var title = "brrr";
 // URL to ICY stream
 var url = new URL('https://radiopilatus.ice.infomaniak.ch/pilatus192.mp3');
 
-var message = {
-    data: {
-        title: 'Duplicate Song',
-        body: title,
-        dupe: '1'
-    },
-    topic: "general"
-};
 
-setTimeout(() => admin.messaging().send(message), 10);
-
-/*getGithubFile("cc959/PilatusBot", "Songs.txt")
+getGithubFile("cc959/PilatusBot", "Songs.txt")
     .then(e => {
         songs = e;
         title = songs.split("\n").pop();
         setInterval(() => getStreamTitle().then(e => doShitWithTitle(e)).catch(e => console.error(e)), 5000);
     })
-    .catch(e => console.error(e));*/
+    .catch(e => console.error(e));
 
 function getStreamTitle() {
 
