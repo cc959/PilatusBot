@@ -39,7 +39,7 @@ getGithubFile("cc959/PilatusBot", "Songs.txt")
     .then(e => {
         songs = e;
         title = songs.split("\n").pop();
-        setInterval(() => getStreamTitle().then(e => doShitWithTitle(e)).catch(e => console.error(e)), 5000);
+        setInterval(() => getStreamTitle().then(e => doShitWithTitle(e)).catch(e => console.error(e)), 4000);
     })
     .catch(e => console.error(e));
 
