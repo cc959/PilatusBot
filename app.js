@@ -97,6 +97,9 @@ function doShitWithTitle(songTitle) {
 
     if (songTitle !== title && !containsPilatus && songTitle.length > 5) {
 
+        if (songs.includes(title))
+            if (songs.length - songs.indexOf(title) < 100)
+                return;
 
         title = songTitle;
 
