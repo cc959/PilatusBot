@@ -110,7 +110,7 @@ function doShitWithTitle(songTitle) {
     if (songTitle !== title && !containsPilatus && songTitle.length > 5) {
 
         if (songs.includes(title))
-            if (songs.length - songs.indexOf(title) < 100)
+            if (songs.length - songs.indexOf(title) < 200)
                 return;
 
         title = songTitle;
@@ -128,7 +128,7 @@ function doShitWithTitle(songTitle) {
 
         if (songs.includes(title)) {
 
-            if (songs.length - songs.indexOf(title) < 100)
+            if (songs.length - songs.indexOf(title) < 200)
                 return;
 
             var message = {
