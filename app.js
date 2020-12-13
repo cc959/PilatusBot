@@ -91,7 +91,7 @@ function doShitWithTitle(songTitle) {
 
     var timeNow = new Date().getUTCHours();
 
-    var withinTime = timeNow > 4 && timeNow < 16;
+    var withinTime = timeNow > 6 && timeNow < 16;
 
     console.log("songtitle: '" + songTitle + "'");
 
