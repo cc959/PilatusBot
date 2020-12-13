@@ -58,7 +58,13 @@ function getStreamTitle() {
 
             res.setEncoding("utf-8");
 
+            var length = 0;
+
+            var metaint = parseInt(res.headers["icy-metaint"]);
+
             res.on('data', (chunk) => {
+
+                length += chunk.length;
 
                 if (chunk.includes("StreamTitle='")) {
 
@@ -70,6 +76,12 @@ function getStreamTitle() {
                         getStreamTitle().then(e => resolve(e)).catch(e => console.error(e));
                     else
                         resolve(title);
+                }
+
+                if (length > metaint) {
+                    res.destroy();
+
+                    rejects("Took too long to respond");
                 }
 
             });
