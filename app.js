@@ -106,6 +106,7 @@ function doShitWithTitle(songTitle) {
     var withinTime = timeNow > 6 && timeNow < 16;
 
     console.log("songtitle: '" + songTitle + "'");
+    console.log(withinTime);
 
     if (songTitle !== title && !containsPilatus && songTitle.length > 5) {
 
