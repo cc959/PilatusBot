@@ -110,9 +110,7 @@ function doShitWithTitle(songTitle) {
 
     if (songTitle !== title && !containsPilatus && songTitle.length > 5) {
 
-        if (songs.includes(title))
-            if (songs.length - songs.indexOf(title) < 200)
-                return;
+      
 
         title = songTitle;
 
@@ -121,9 +119,7 @@ function doShitWithTitle(songTitle) {
             editGithubFile("cc959/PilatusBot", "Songs.txt", "Song updated by web app", songs).catch(e => console.error(e));
             return;
         }
-
-        console.log(title);
-        channel.send(title);
+        
 
         getGithubFile("cc959/PilatusBot", "Songs.txt").then(e => songs = e).catch(e => console.error(e));
 
@@ -131,7 +127,7 @@ function doShitWithTitle(songTitle) {
 
             if (songs.length - songs.indexOf(title) < 200)
                 return;
-
+channel.send("Dupe: " + title);
             var message = {
                 data: {
                     title: 'Duplicate Song',
@@ -145,6 +141,7 @@ function doShitWithTitle(songTitle) {
             console.log("sent firebase message");
 
         } else {
+channel.send(title);
             songs += "\n" + title;
 
             var message = {
