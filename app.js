@@ -7,12 +7,13 @@ var atob = require("atob")
 var serviceAccount = require('./Firebase.json');
 const { resolve } = require('path');
 const { rejects } = require('assert');
+const { pathToFileURL } = require('url');
 
 const token = "caf09329a307fa9111cf9ee2bd8ea7bdf031c7ea";
 const oneDay = 60 * 60 * 24 * 1000 //One day in millis
-const startDay = new Date(2021, 0, 6); //Day to start count - Month is 0-based index
+const startDay = new Date(2021, 0, 5); //Day to start count - Month is 0-based index
 
-var currentFilePath = "";
+var currentFilePath = "Songs" + fullDaysSinceStart() + ".txt";
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -20,7 +21,7 @@ admin.initializeApp({
 })
 
 
-var songs;
+var songs = "";
 
 
 var client = new Discord.Client();
@@ -40,13 +41,19 @@ var url = new URL('https://radiopilatus.ice.infomaniak.ch/pilatus192.mp3');
 
 
 
-getGithubFile("cc959/PilatusBot", currentFilePath)
-    .then(e => {
-        songs = e;
-        title = songs.split("\n").pop();
-        setInterval(() => getStreamTitle().then(e => doShitWithTitle(e)).catch(e => console.error(e)), 4000);
-    })
-    .catch(e => console.error(e));
+getGithubFileInfo("cc959/PilatusBot", "").then(e => {
+    if (!JSON.stringify(e).includes(pathToFileURL))
+        editGithubFile("cc959/PilatusBot", currentFilePath, "Song updated by web app", songs).then(e => {
+            setInterval(() => getStreamTitle().then(e => doShitWithTitle(e)).catch(e => console.error(e)), 4000);
+        })
+    else {
+        getGithubFile("cc959/PilatusBot", currentFilePath).then(e => {
+            songs = e;
+            title = songs.split("\n").pop();
+            setInterval(() => getStreamTitle().then(e => doShitWithTitle(e)).catch(e => console.error(e)), 4000);
+        })
+    }
+}).catch(e => console.error(e));
 
 function fullDaysSinceStart() {
 
@@ -131,6 +138,10 @@ function doShitWithTitle(songTitle) {
 
         if (!withinTime) {
             songs = "\n";
+            getGithubFileInfo("cc959/PilatusBot", "").then(e => {
+                if (!JSON.stringify(e).includes(pathToFileURL))
+                    editGithubFile("cc959/PilatusBot", currentFilePath, "Song updated by web app", songs)
+            }).catch(e => console.error(e));
             return;
         }
 
