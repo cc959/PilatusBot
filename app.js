@@ -9,15 +9,19 @@ const { resolve } = require('path');
 const { rejects } = require('assert');
 
 const token = "caf09329a307fa9111cf9ee2bd8ea7bdf031c7ea";
+const oneDay = 60 * 60 * 24 * 1000 //One day in millis
+const startDay = new Date(2021, 0, 6); //Day to start count - Month is 0-based index
+
+var currentFilePath = "";
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: "https://pilatusbot-e5644-default-rtdb.firebaseio.com/"
 })
 
-var count = 0;
 
 var songs;
+
 
 var client = new Discord.Client();
 client.login("Nzg0MTEyNjM4NTY0MjM3MzYy.X8kjzQ.UzFYcMfTmLk_viDAkZoGztHylSc");
@@ -35,13 +39,21 @@ var title = "brrr";
 var url = new URL('https://radiopilatus.ice.infomaniak.ch/pilatus192.mp3');
 
 
-getGithubFile("cc959/PilatusBot", "Songs.txt")
+
+getGithubFile("cc959/PilatusBot", currentFilePath)
     .then(e => {
         songs = e;
         title = songs.split("\n").pop();
         setInterval(() => getStreamTitle().then(e => doShitWithTitle(e)).catch(e => console.error(e)), 4000);
     })
     .catch(e => console.error(e));
+
+function fullDaysSinceStart() {
+
+    var now = new Date();
+    return Math.floor((now - startDay) / oneDay);
+
+}
 
 function getStreamTitle() {
 
@@ -105,29 +117,31 @@ function doShitWithTitle(songTitle) {
 
     var withinTime = timeNow > 6 && timeNow < 16;
 
+    currentFilePath = "Songs" + fullDaysSinceStart() + ".txt";
+
     console.log("songtitle: '" + songTitle + "'");
-    console.log(withinTime);
+    console.log(withinTime + " " + currentFilePath);
+
 
     if (songTitle !== title && !containsPilatus && songTitle.length > 5) {
 
-      
+
 
         title = songTitle;
 
         if (!withinTime) {
             songs = "\n";
-            editGithubFile("cc959/PilatusBot", "Songs.txt", "Song updated by web app", songs).catch(e => console.error(e));
             return;
         }
-        
 
-        getGithubFile("cc959/PilatusBot", "Songs.txt").then(e => songs = e).catch(e => console.error(e));
+
+        getGithubFile("cc959/PilatusBot", currentFilePath).then(e => songs = e).catch(e => console.error(e));
 
         if (songs.includes(title)) {
 
             if (songs.length - songs.indexOf(title) < 200)
                 return;
-channel.send("Dupe: " + title);
+            channel.send("Dupe: " + title);
             var message = {
                 data: {
                     title: 'Duplicate Song',
@@ -141,7 +155,7 @@ channel.send("Dupe: " + title);
             console.log("sent firebase message");
 
         } else {
-channel.send(title);
+            channel.send(title);
             songs += "\n" + title;
 
             var message = {
@@ -153,7 +167,7 @@ channel.send(title);
                 topic: "general"
             };
 
-            editGithubFile("cc959/PilatusBot", "Songs.txt", "Song updated by web app", songs).catch(e => console.error(e));
+            editGithubFile("cc959/PilatusBot", currentFilePath, "Song updated by web app", songs).catch(e => console.error(e));
 
             setTimeout(() => admin.messaging().send(message), 10);
             console.log("sent firebase message");
