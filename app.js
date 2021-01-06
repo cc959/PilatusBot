@@ -11,7 +11,7 @@ const { pathToFileURL } = require('url');
 
 const token = "caf09329a307fa9111cf9ee2bd8ea7bdf031c7ea";
 const oneDay = 60 * 60 * 24 * 1000 //One day in millis
-const startDay = new Date(2021, 0, 6); //Day to start count - Month is 0-based index
+const startDay = new Date(2021, 0, 5); //Day to start count - Month is 0-based index
 
 var currentFilePath = "Songs" + fullDaysSinceStart() + ".txt";
 
