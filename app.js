@@ -161,6 +161,7 @@ function doShitWithTitle(songTitle) {
                     dupe: '1'
                 },
                 topic: "general"
+                
             };
 
             setTimeout(() => admin.messaging().send(message), 10);
