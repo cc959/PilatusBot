@@ -122,7 +122,7 @@ function doShitWithTitle(songTitle) {
 
     var timeNow = new Date().getUTCHours();
 
-    var withinTime = timeNow > 6 && timeNow < 16;
+    var withinTime = timeNow > 5 && timeNow < 15;
 
     var newFilePath = "Songs" + fullDaysSinceStart() + ".txt";
 
@@ -161,7 +161,7 @@ function doShitWithTitle(songTitle) {
                     dupe: '1'
                 },
                 topic: "general"
-                
+
             };
 
             setTimeout(() => admin.messaging().send(message), 10);
