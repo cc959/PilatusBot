@@ -9,6 +9,7 @@ const { resolve } = require('path');
 const { rejects } = require('assert');
 const { pathToFileURL } = require('url');
 
+// I know this is supposed to be private... Just don't be a asshole and screw with my bot
 const token = "caf09329a307fa9111cf9ee2bd8ea7bdf031c7ea";
 const oneDay = 60 * 60 * 24 * 1000 //One day in millis
 const startDay = new Date(2021, 0, 6); //Day to start count - Month is 0-based index
@@ -23,7 +24,7 @@ admin.initializeApp({
 
 var songs = "";
 
-
+// I know this is supposed to be private... Just don't be a asshole and screw with my bot
 var client = new Discord.Client();
 client.login("Nzg0MTEyNjM4NTY0MjM3MzYy.X8kjzQ.UzFYcMfTmLk_viDAkZoGztHylSc");
 var channel;
